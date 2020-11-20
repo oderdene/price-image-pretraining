@@ -18,3 +18,6 @@ This repo's attempt is try to pre-train images of prices.
 
 # Sample images
 
+![price image 1](https://raw.githubusercontent.com/sharavsambuu/price-image-pretraining/master/images/2020-03-02_30_330.png)
+![price image 2](https://raw.githubusercontent.com/sharavsambuu/price-image-pretraining/master/images/2020-03-02_30_300.png)
+![price image 3](https://raw.githubusercontent.com/sharavsambuu/price-image-pretraining/master/images/2020-03-02_30_270.png)
