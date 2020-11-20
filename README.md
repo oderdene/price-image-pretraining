@@ -2,7 +2,7 @@
 This repo's attempt is try to pre-train images of prices.
 
 # Todo
-- Write simple masking data augmenter since price image doesn't have much color
+- Write simple cropper data augmenter since price image doesn't have much color
 - Create an encoder model
 - Do some contrastive training
 - Plot some image's features on tSNE
