@@ -1,6 +1,15 @@
 # About
 This repo's attempt is try to pre-train images of prices.
 
+# Todo
+- Write simple masking data augmenter since price image doesn't have much color
+- Create an encoder model
+- Do some contrastive training
+- Plot some image's features on tSNE
+- Freeze trained layer for preparation of finetune
+- Fine-tune model for classification
+- Evaluate classification result and also plot features
+
 # References
 - https://github.com/mwdhont/SimCLRv1-keras-tensorflow
 - https://amitness.com/2020/03/illustrated-simclr/
