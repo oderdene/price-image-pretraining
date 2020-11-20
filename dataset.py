@@ -3,6 +3,7 @@ import random
 import tensorflow.compat.v1 as tf
 import cv2 as cv
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 # https://github.com/mwdhont/SimCLRv1-keras-tensorflow/blob/master/SimCLR_data_util.py#L161
@@ -198,10 +199,17 @@ class Dataset:
 
 
 if __name__=="__main__":
+    batch_size = 5
+
+    f, axarr = plt.subplots(batch_size,2)
+
     ds = Dataset(folder_path="./dataset")
-    for _ in range(1):
-        batch_x, batch_y = ds.next_batch(batch_size=5)
-        print(len(batch_x), len(batch_y))
-        print(batch_x[0].shape)
-        print(batch_y[0].shape)
-    pass
+    batch_x, batch_y = ds.next_batch(batch_size=batch_size)
+
+    for i in range(batch_size):
+        axarr[i,0].imshow(batch_x[i])
+        axarr[i,1].imshow(batch_y[i])
+
+    plt.tight_layout()
+    plt.show()
+
