@@ -181,21 +181,22 @@ class Dataset:
         print("dataset is loaded.")
         pass
     def next_batch(self, batch_size):
-        batch_x       = []
-        batch_y       = []
+        batch_a       = []
+        batch_b       = []
         random_images = [random.choice(self.image_paths) for _ in range(batch_size)]
         for i, row in enumerate(random_images):
-            img = cv.cvtColor(cv.imread(row), cv.COLOR_BGR2RGB)
-            img = tf.convert_to_tensor(
-                np.asarray((img / 255)).astype("float32")
-            )
-            img = tf.image.resize_bicubic([img], [self.height, self.width])[0] # optional
-            augmented = random_crop_with_resize(img, self.height, self.width)
-            augmented = tf.reshape(augmented, [self.height, self.width, 3])
-            augmented = tf.clip_by_value(augmented, 0., 1.)
-            batch_x.append(img      )
-            batch_y.append(augmented)
-        return batch_x, batch_y
+            img       = cv.cvtColor(cv.imread(row), cv.COLOR_BGR2RGB)
+            img       = tf.convert_to_tensor(np.asarray((img / 255)).astype("float32"))
+            img       = tf.image.resize_bicubic([img], [self.height, self.width])[0] # optional
+            augmented_a = random_crop_with_resize(img, self.height, self.width)
+            augmented_a = tf.reshape(augmented_a, [self.height, self.width, 3])
+            augmented_a = tf.clip_by_value(augmented_a, 0., 1.)
+            batch_a.append(augmented_a)
+            augmented_b = random_crop_with_resize(img, self.height, self.width)
+            augmented_b = tf.reshape(augmented_b, [self.height, self.width, 3])
+            augmented_b = tf.clip_by_value(augmented_b, 0., 1.)
+            batch_b.append(augmented_b)
+        return batch_a, batch_b
 
 
 if __name__=="__main__":
@@ -204,11 +205,11 @@ if __name__=="__main__":
     f, axarr = plt.subplots(batch_size,2)
 
     ds = Dataset(folder_path="./dataset")
-    batch_x, batch_y = ds.next_batch(batch_size=batch_size)
+    batch_a, batch_b = ds.next_batch(batch_size=batch_size)
 
     for i in range(batch_size):
-        axarr[i,0].imshow(batch_x[i])
-        axarr[i,1].imshow(batch_y[i])
+        axarr[i,0].imshow(batch_a[i])
+        axarr[i,1].imshow(batch_b[i])
 
     plt.tight_layout()
     plt.show()
