@@ -3,8 +3,8 @@ This repo's attempt is try to pre-train images of prices.
 
 # Todo
 - DONE    : Write simple cropper data augmenter since price image doesn't have much color
-- ONGOING : Create an encoder model
-- Do some contrastive training
+- DONE    : Create an encoder model
+- ONGOING : Do some contrastive training
 - Plot some image's features on tSNE
 - Freeze trained layer for preparation of finetune
 - Fine-tune model for classification
