@@ -10,6 +10,7 @@ BATCH_SIZE    = 5
 EPOCHS        = 1
 DECAY_STEPS   = 1000
 LEARNING_RATE = 0.1
+SAVE_STEP     = 100
 
 
 class SimCLR(tf.keras.Model):
@@ -112,6 +113,20 @@ if __name__=="__main__":
     optimizer     = tf.keras.optimizers.SGD(lr_decayed_fn)
 
     simclr_model = SimCLR()
+
+    ckpt = tf.train.Checkpoint(
+            step=tf.Variable(1),
+            optimizer=optimizer,
+            net=simclr_model
+            )
+    ckpt_manager = tf.train.CheckpointManager(ckpt, './checkpoints', max_to_keep=3)
+    ckpt.restore(ckpt_manager.latest_checkpoint)
+
+    if ckpt_manager.latest_checkpoint:
+        print("Latest weights restored from {}".format(ckpt_manager.latest_checkpoint))
+    else:
+        print("Initializing weights from scratch")
+
     ds           = Dataset(folder_path="./dataset")
 
     for epoch in range(EPOCHS):
@@ -124,5 +139,10 @@ if __name__=="__main__":
             print("epoch {} step {} of {}, loss {}".format(
                 epoch, step, total_steps-1, loss
                 ))
+            ckpt.step.assign_add(1)
+            if int(ckpt.step)%SAVE_STEP==0:
+                save_path = ckpt_manager.save()
+                print("Saved checkpoint for step {}: {}".format(int(ckpt.step), save_path))
             pass
+        pass
     pass
