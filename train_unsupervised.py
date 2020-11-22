@@ -29,23 +29,63 @@ class SimCLR(tf.keras.Model):
         return self.z_layer(x)
 
 
+def get_negative_mask(batch_size):
+    # return a mask that removes the similarity score of equal/similar images.
+    # this function ensures that only distinct pair of images get their similarity scores
+    # passed as negative examples
+    negative_mask = np.ones((batch_size, 2 * batch_size), dtype=bool)
+    for i in range(batch_size):
+        negative_mask[i, i] = 0
+        negative_mask[i, i + batch_size] = 0
+    return tf.constant(negative_mask)
+
+def _dot_simililarity_dim1(x, y):
+    # x shape: (N, 1, C)
+    # y shape: (N, C, 1)
+    # v shape: (N, 1, 1)
+    v = tf.matmul(tf.expand_dims(x, 1), tf.expand_dims(y, 2))
+    return v
+
+def _dot_simililarity_dim2(x, y):
+    v = tf.tensordot(tf.expand_dims(x, 1), tf.expand_dims(tf.transpose(y), 0), axes=2)
+    # x shape: (N, 1, C)
+    # y shape: (1, C, 2N)
+    # v shape: (N, 2N)
+    return v
+
+
+@tf.function
+def train_step(xis, xjs, model, optimizer, criterion, temperature):
+    with tf.GradientTape() as tape:
+        zis = model(xis)
+        zjs = model(xjs)
+        pass
+    pass
+
+
 if __name__=="__main__":
     print("train unsupervised way")
-    """
-    batch_size = 5
-    f, axarr   = plt.subplots(batch_size,2)
-    ds         = Dataset(folder_path="./dataset")
-    batch_a, batch_b = ds.next_batch(batch_size=batch_size)
-    for i in range(batch_size):
-        axarr[i,0].imshow(batch_a[i])
-        axarr[i,1].imshow(batch_b[i])
-    plt.tight_layout()
-    plt.show()
-    """
+
+    criterion = tf.keras.losses.SparseCategoricalCrossentropy(
+            from_logits = True,
+            reduction   = tf.keras.losses.Reduction.SUM)
+    lr_decayed_fn = tf.keras.experimental.CosineDecay(
+            initial_learning_rate = 0.1,
+            decay_steps           = 1000)
+    optimizer     = tf.keras.optimizers.SGD(lr_decayed_fn)
+
     simclr_model = SimCLR()
-    test_input   = tf.random.uniform(shape=[5, 512, 512, 3])
-    test_output  = simclr_model(test_input)
-    print("test output :")
-    print(test_output.shape)
-    print(test_output)
+    ds           = Dataset(folder_path="./dataset")
+
+    batch_size = 5
+    epochs     = 1
+    for epoch in range(epochs):
+        total_steps = int(len(ds.image_paths)/batch_size)
+        for step in range(total_steps):
+            print("epoch {} step {} of {}".format(epoch, step, total_steps-1))
+            xis, xjs = ds.next_batch(batch_size=batch_size)
+            xis = tf.convert_to_tensor(xis)
+            xjs = tf.convert_to_tensor(xjs)
+            loss = train_step(xis, xjs, simclr_model, optimizer, criterion, temperature=0.1)
+            pass
     pass
