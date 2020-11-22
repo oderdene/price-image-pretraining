@@ -6,6 +6,11 @@ import numpy as np
 from dataset import Dataset
 
 
+BATCH_SIZE    = 5
+EPOCHS        = 1
+DECAY_STEPS   = 1000
+LEARNING_RATE = 0.1
+
 class SimCLR(tf.keras.Model):
     def __init__(self,):
         super(SimCLR, self).__init__()
@@ -21,8 +26,8 @@ class SimCLR(tf.keras.Model):
         self.projection_1 = tf.keras.layers.Dense(265, activation='relu')
         self.projection_2 = tf.keras.layers.Dense(128, activation='relu')
         self.z_layer      = tf.keras.layers.Dense(64)
-    def call(self, inputs):
-        x = self.resnet_layer(inputs)
+    def call(self, inputs, training=False):
+        x = self.resnet_layer(inputs, training=training)
         x = self.h_layer(x)
         x = self.projection_1(x)
         x = self.projection_2(x)
@@ -54,13 +59,44 @@ def _dot_simililarity_dim2(x, y):
     return v
 
 
+negative_mask = get_negative_mask(BATCH_SIZE)
+
 @tf.function
 def train_step(xis, xjs, model, optimizer, criterion, temperature):
     with tf.GradientTape() as tape:
-        zis = model(xis)
-        zjs = model(xjs)
+        zis = model(xis, training=True)
+        zjs = model(xjs, training=True)
+
+        zis = tf.math.l2_normalize(zis, axis=1)
+        zjs = tf.math.l2_normalize(zjs, axis=1)
+
+        l_pos  = _dot_simililarity_dim1(zis, zjs)
+        l_pos  = tf.reshape(l_pos, (BATCH_SIZE, 1))
+        l_pos /= temperature
+
+        negatives = tf.concat([zjs, zis], axis=0)
+
+        loss = 0
+
+        for positives in [zis, zjs]:
+            l_neg  = _dot_simililarity_dim2(positives, negatives)
+
+            labels = tf.zeros(BATCH_SIZE, dtype=tf.int32)
+
+            l_neg  = tf.boolean_mask(l_neg, negative_mask)
+            l_neg  = tf.reshape(l_neg, (BATCH_SIZE, -1))
+            l_neg /= temperature
+
+            logits = tf.concat([l_pos, l_neg], axis=1)
+            loss  += criterion(y_pred=logits, y_true=labels)
+
+        loss = loss/(2*BATCH_SIZE)
         pass
-    pass
+
+    gradients = tape.gradient(loss, model.trainable_variables)
+    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+
+    return loss
 
 
 if __name__=="__main__":
@@ -70,22 +106,22 @@ if __name__=="__main__":
             from_logits = True,
             reduction   = tf.keras.losses.Reduction.SUM)
     lr_decayed_fn = tf.keras.experimental.CosineDecay(
-            initial_learning_rate = 0.1,
-            decay_steps           = 1000)
+            initial_learning_rate = LEARNING_RATE,
+            decay_steps           = DECAY_STEPS)
     optimizer     = tf.keras.optimizers.SGD(lr_decayed_fn)
 
     simclr_model = SimCLR()
     ds           = Dataset(folder_path="./dataset")
 
-    batch_size = 5
-    epochs     = 1
-    for epoch in range(epochs):
-        total_steps = int(len(ds.image_paths)/batch_size)
+    for epoch in range(EPOCHS):
+        total_steps = int(len(ds.image_paths)/BATCH_SIZE)
         for step in range(total_steps):
-            print("epoch {} step {} of {}".format(epoch, step, total_steps-1))
-            xis, xjs = ds.next_batch(batch_size=batch_size)
+            xis, xjs = ds.next_batch(batch_size=BATCH_SIZE)
             xis = tf.convert_to_tensor(xis)
             xjs = tf.convert_to_tensor(xjs)
             loss = train_step(xis, xjs, simclr_model, optimizer, criterion, temperature=0.1)
+            print("epoch {} step {} of {}, loss {}".format(
+                epoch, step, total_steps-1, loss
+                ))
             pass
     pass
