@@ -2,9 +2,10 @@
 This repo's attempt is try to pre-train images of prices.
 
 # Todo
-- DONE    : Write simple cropper data augmenter since price image doesn't have much color
-- DONE    : Create an encoder model
-- ONGOING : Do some contrastive training
+- DONE : Write simple cropper data augmenter since price image doesn't have much color
+- DONE : Create an encoder model
+- DONE : Implement some contrastive training
+- ONGOING : Implement model checkpointing
 - Plot some image's features on tSNE
 - Freeze trained layer for preparation of finetune
 - Fine-tune model for classification
@@ -16,9 +17,7 @@ This repo's attempt is try to pre-train images of prices.
 - https://github.com/google-research/simclr
 - https://github.com/sayakpaul/SimCLR-in-TensorFlow-2
 
-
 # Sample images
-
 ![augmented batch](images/crop_augmented_batch.png?raw=true "Augmented batch")
 ![price image 1](images/2020-03-02_30_330.png?raw=true "Price image 1")
 ![price image 2](images/2020-03-02_30_300.png?raw=true "Price image 2")

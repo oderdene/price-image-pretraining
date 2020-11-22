@@ -11,6 +11,7 @@ EPOCHS        = 1
 DECAY_STEPS   = 1000
 LEARNING_RATE = 0.1
 
+
 class SimCLR(tf.keras.Model):
     def __init__(self,):
         super(SimCLR, self).__init__()
@@ -52,10 +53,10 @@ def _dot_simililarity_dim1(x, y):
     return v
 
 def _dot_simililarity_dim2(x, y):
-    v = tf.tensordot(tf.expand_dims(x, 1), tf.expand_dims(tf.transpose(y), 0), axes=2)
     # x shape: (N, 1, C)
     # y shape: (1, C, 2N)
     # v shape: (N, 2N)
+    v = tf.tensordot(tf.expand_dims(x, 1), tf.expand_dims(tf.transpose(y), 0), axes=2)
     return v
 
 
