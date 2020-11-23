@@ -86,3 +86,12 @@ if __name__=="__main__":
     else:
         print("Initializing weights from scratch")
 
+    # neural surgical procedure :P
+    for layer in simclr_model.layers:
+        print(layer.name)
+
+    conv_layer = simclr_model.get_layer('convolutional_features')
+    sample_input  = tf.random.normal(shape=(5, 256, 256, 3))
+    sample_output = conv_layer(sample_input)
+    print(sample_output.shape)
+    print(sample_output)
