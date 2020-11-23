@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 # https://github.com/mwdhont/SimCLRv1-keras-tensorflow/blob/master/SimCLR_data_util.py#L161
 
-CROP_PROPRTION = 0.875 # Standard for ImageNet
+CROP_PROPRTION = 0.95
 
 def random_apply(func, p, x):
     """Randomly apply function func to x with probability p."""
@@ -167,8 +167,8 @@ def preprocess_image(image, height, width):
 
 class Dataset:
     def __init__(self, folder_path):
-        self.height = 512
-        self.width  = 512
+        self.height = 256
+        self.width  = 256
         print("dataset is loading please wait...")
         self.image_paths = []
         for root, dirs, files in os.walk(folder_path):
