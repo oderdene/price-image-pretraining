@@ -6,8 +6,8 @@ This repo's attempt is try to pre-train images of prices.
 - DONE : Create an encoder model
 - DONE : Implement some contrastive training
 - DONE : Implement model checkpointing
-- ONHOLD  : Do actual training on bigger dataset
-- ONGOING : Change RestNet50 to light weight layers
+- DONE : Change RestNet50 to light weight layers
+- ONGOING : Do actual training on bigger dataset
 - Plot some image's features on tSNE
 - Freeze trained layer for preparation of finetune
 - Prepare sample dataset for classification

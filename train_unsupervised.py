@@ -14,7 +14,7 @@ if tf.config.list_physical_devices('GPU'):
         [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4000)])
 
 
-BATCH_SIZE    = 5
+BATCH_SIZE    = 64
 EPOCHS        = 1
 DECAY_STEPS   = 1000
 LEARNING_RATE = 0.1
