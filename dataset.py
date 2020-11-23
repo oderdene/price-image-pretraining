@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 # https://github.com/mwdhont/SimCLRv1-keras-tensorflow/blob/master/SimCLR_data_util.py#L161
 
-CROP_PROPRTION = 0.875 # Standard for ImageNet
+CROP_PROPRTION = 0.95
 
 def random_apply(func, p, x):
     """Randomly apply function func to x with probability p."""
