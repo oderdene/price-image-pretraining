@@ -55,13 +55,11 @@ class SimCLR(tf.keras.Model):
                 input_shape=(256, 256, 3),
                 output_features=256,
                 name="convolutional_features")
-        self.flatten      = tf.keras.layers.Flatten()
         self.projection_1 = tf.keras.layers.Dense(256, activation='relu')
         self.projection_2 = tf.keras.layers.Dense(128, activation='relu')
         self.z_layer      = tf.keras.layers.Dense(64)
     def call(self, inputs, training=False):
         x = self.conv_layer(inputs)
-        x = self.flatten(x)
         x = self.projection_1(x)
         x = self.projection_2(x)
         return self.z_layer(x)
