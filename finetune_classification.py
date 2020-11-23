@@ -64,6 +64,20 @@ class SimCLR(tf.keras.Model):
         x = self.projection_2(x)
         return self.z_layer(x)
 
+class ClassifierModel(tf.keras.Model):
+    def __init__(self, conv_weights, n_classes=None):
+        super(ClassifierModel, self).__init__()
+        self.conv_layer = ConvolutionalLayer(
+                input_shape=(256, 256, 3),
+                output_features=256,
+                name="convolutional_features"
+                )
+        self.conv_layer.set_weights(conv_weights)
+        self.conv_layer.trainable = False
+        self.output_layer = tf.keras.layers.Dense(n_classes, activation='softmax')
+    def call(self, inputs):
+        x = self.conv_layer(inputs)
+        return self.output_layer(x)
 
 
 if __name__=="__main__":
@@ -86,17 +100,15 @@ if __name__=="__main__":
     else:
         print("Initializing weights from scratch")
 
+
     # neural surgical procedure :P
-    for layer in simclr_model.layers:
-        print(layer.name)
+    conv_layer   = simclr_model.get_layer('convolutional_features')
+    conv_weights = conv_layer.get_weights()
 
-    conv_layer = simclr_model.get_layer('convolutional_features')
-    sample_input  = tf.random.normal(shape=(5, 256, 256, 3))
-    sample_output = conv_layer(sample_input)
-    print(sample_output.shape)
-    print(sample_output)
-
-    conv_layer_weights = conv_layer.get_weights()
-    print("convolutional layer weights :")
-    print(conv_layer_weights)
+    classifier = ClassifierModel(conv_weights, n_classes=10)
+    s_inp = tf.random.normal(shape=(5, 256, 256, 3))
+    s_out = classifier(s_inp)
+    print("classification output :")
+    print(s_out.shape)
+    print(s_out)
 
