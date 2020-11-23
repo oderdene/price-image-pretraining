@@ -37,15 +37,15 @@ class ConvolutionalLayer(tf.keras.layers.Layer):
         self.averagepooling  = tf.keras.layers.GlobalAveragePooling2D()
         self.dropout_2       = tf.keras.layers.Dropout(0.5)
         self.output_layer    = tf.keras.layers.Dense(output_features)
-    def call(self, inputs):
+    def call(self, inputs, training=False):
         x = self.conv_1(inputs)
         x = self.maxpooling_1(x)
-        x = self.dropout_1(x)
+        x = self.dropout_1(x, training=training)
         x = self.conv_2(x)
         x = self.normalization_1(x)
         x = self.maxpooling_2(x)
         x = self.averagepooling(x)
-        x = self.dropout_2(x)
+        x = self.dropout_2(x, training=training)
         return self.output_layer(x)
 
 class SimCLR(tf.keras.Model):
@@ -59,7 +59,7 @@ class SimCLR(tf.keras.Model):
         self.projection_2 = tf.keras.layers.Dense(128, activation='relu')
         self.z_layer      = tf.keras.layers.Dense(64)
     def call(self, inputs, training=False):
-        x = self.conv_layer(inputs)
+        x = self.conv_layer(inputs, training=training)
         x = self.projection_1(x)
         x = self.projection_2(x)
         return self.z_layer(x)
