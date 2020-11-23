@@ -95,3 +95,8 @@ if __name__=="__main__":
     sample_output = conv_layer(sample_input)
     print(sample_output.shape)
     print(sample_output)
+
+    conv_layer_weights = conv_layer.get_weights()
+    print("convolutional layer weights :")
+    print(conv_layer_weights)
+
