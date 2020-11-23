@@ -2,16 +2,16 @@
 This repo's attempt is try to pre-train images of prices.
 
 # Todo
-- DONE : Write simple cropper data augmenter since price image doesn't have much color
+- DONE : Write simple cropping augmenter since price image doesn't have much color
 - DONE : Create an encoder model
-- DONE : Implement some contrastive training
+- DONE : Implement contrastive training
 - DONE : Implement model checkpointing
-- DONE : Change RestNet50 to light weight layers
+- DONE : Change a RestNet50 to the light weight layers
+- DONE : Freeze trained layer for finetuning
+- DONE : Fine-tune model for classification
 - ONGOING : Do actual training on bigger dataset
-- Plot some image's features on tSNE
-- Freeze trained layer for preparation of finetune
+- Plot some image features on tSNE
 - Prepare sample dataset for classification
-- Fine-tune model for classification
 - Evaluate classification result and also plot features
 
 # References
