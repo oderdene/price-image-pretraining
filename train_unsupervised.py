@@ -1,4 +1,5 @@
 import os
+import sys
 import random
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -12,6 +13,33 @@ DECAY_STEPS   = 1000
 LEARNING_RATE = 0.1
 SAVE_STEP     = 100
 
+
+class ConvolutionalLayer(tf.keras.layers.Layer):
+    def __init__(self, input_shape=None, output_features=None):
+        super(ConvolutionalLayer, self).__init__()
+        self.conv_1          = tf.keras.layers.Conv2D(
+                32, kernel_size=(3, 3), activation='relu', input_shape=input_shape)
+        self.maxpooling_1    = tf.keras.layers.MaxPooling2D(
+                pool_size=(2, 2), strides=2)
+        self.dropout_1       = tf.keras.layers.Dropout(0.2)
+        self.conv_2          = tf.keras.layers.Conv2D(
+                64, kernel_size=(3, 3), activation='relu')
+        self.normalization_1 = tf.keras.layers.BatchNormalization()
+        self.maxpooling_2    = tf.keras.layers.MaxPooling2D(
+                pool_size=(2, 2), strides=2)
+        self.averagepooling  = tf.keras.layers.GlobalAveragePooling2D()
+        self.dropout_2       = tf.keras.layers.Dropout(0.5)
+        self.output_layer    = tf.keras.layers.Dense(output_features)
+    def call(self, inputs):
+        x = self.conv_1(inputs)
+        x = self.maxpooling_1(x)
+        x = self.dropout_1(x)
+        x = self.conv_2(x)
+        x = self.normalization_1(x)
+        x = self.maxpooling_2(x)
+        x = self.averagepooling(x)
+        x = self.dropout_2(x)
+        return self.output_layer(x)
 
 class SimCLR(tf.keras.Model):
     def __init__(self,):
@@ -103,6 +131,12 @@ def train_step(xis, xjs, model, optimizer, criterion, temperature):
 
 if __name__=="__main__":
     print("train unsupervised way")
+    layer = ConvolutionalLayer(input_shape=(256, 256, 3), output_features=64)
+    sample_input  = np.random.normal(size=(128, 256, 256, 3))
+    sample_output = layer(sample_input)
+    print(sample_output.shape)
+    print(sample_output)
+    sys.exit()
 
     criterion = tf.keras.losses.SparseCategoricalCrossentropy(
             from_logits = True,
@@ -110,7 +144,7 @@ if __name__=="__main__":
     lr_decayed_fn = tf.keras.experimental.CosineDecay(
             initial_learning_rate = LEARNING_RATE,
             decay_steps           = DECAY_STEPS)
-    optimizer     = tf.keras.optimizers.SGD(lr_decayed_fn)
+    optimizer = tf.keras.optimizers.SGD(lr_decayed_fn)
 
     simclr_model = SimCLR()
 
