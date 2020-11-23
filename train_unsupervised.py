@@ -6,8 +6,18 @@ import tensorflow as tf
 import numpy as np
 from dataset import Dataset
 
+#if tf.config.list_physical_devices('GPU'):
+#    physical_devices = tf.config.list_physical_devices('GPU')
+#    tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
+#    tf.config.experimental.set_virtual_device_configuration(
+#        physical_devices[0], 
+#        [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4000)])
+gpu_devices = tf.config.experimental.list_physical_devices('GPU')
+for device in gpu_devices:
+    tf.config.experimental.set_memory_growth(device, True)
 
-BATCH_SIZE    = 5
+
+BATCH_SIZE    = 4
 EPOCHS        = 1
 DECAY_STEPS   = 1000
 LEARNING_RATE = 0.1
@@ -161,15 +171,19 @@ if __name__=="__main__":
     else:
         print("Initializing weights from scratch")
 
-    ds           = Dataset(folder_path="./dataset")
+    ds = Dataset(folder_path="./dataset")
 
     for epoch in range(EPOCHS):
         total_steps = int(len(ds.image_paths)/BATCH_SIZE)
         for step in range(total_steps):
             xis, xjs = ds.next_batch(batch_size=BATCH_SIZE)
-            xis = tf.convert_to_tensor(xis)
-            xjs = tf.convert_to_tensor(xjs)
+            xis = tf.convert_to_tensor(xis, dtype=tf.float32)
+            xjs = tf.convert_to_tensor(xjs, dtype=tf.float32)
+            #print(xis.shape)
+            #print(xjs.shape)
             loss = train_step(xis, xjs, simclr_model, optimizer, criterion, temperature=0.1)
+            #print(loss)
+            #break
             print("epoch {} step {} of {}, loss {}".format(
                 epoch, step, total_steps-1, loss
                 ))
