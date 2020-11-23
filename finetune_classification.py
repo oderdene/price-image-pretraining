@@ -65,23 +65,16 @@ class SimCLR(tf.keras.Model):
         return self.z_layer(x)
 
 class ClassifierModel(tf.keras.Model):
-    def __init__(self, conv_weights, n_classes=None):
+    def __init__(self, n_classes=None):
         super(ClassifierModel, self).__init__()
-        self.conv_layer = ConvolutionalLayer(
-                input_shape=(256, 256, 3),
-                output_features=256,
-                name="convolutional_features"
-                )
-        self.conv_layer.set_weights(conv_weights)
-        self.conv_layer.trainable = False
-        #self.reshaper     = tf.keras.layers.Reshape()
+        self.seq_layer    = tf.keras.layers.Bidirectional(
+                tf.keras.layers.LSTM(64))
+        self.dense_layer  = tf.keras.layers.Dense(32)
         self.output_layer = tf.keras.layers.Dense(n_classes, activation='softmax')
     def call(self, inputs):
-        x = tf.reshape(inputs, [-1, 256, 256, 3])
-        #x = self.conv_layer(x)
-        #x = conv_inference(inputs)
-        return x
-        #return self.output_layer(x)
+        x = self.seq_layer(inputs)
+        x = self.dense_layer(x)
+        return self.output_layer(x)
 
 
 if __name__=="__main__":
@@ -114,17 +107,29 @@ if __name__=="__main__":
     seq_len    = 10
     features   = 128
 
-    classifier = ClassifierModel(conv_weights, n_classes=3)            # [up, down, hold]
+    classifier = ClassifierModel(n_classes=3) # [up, down, hold]
+
+
+    print("batch of sequence of images to be classified")
     s_inp = tf.random.normal(shape=(batch_size, seq_len, 256, 256, 3)) # [batch, seq, height, width, channel]
     print(s_inp.shape)
+
+    print("preparing to get feature vector using convolutional layer")
     s_inp = tf.reshape(s_inp, [-1, 256, 256, 3])
     print(s_inp.shape)
-    s_out = conv_layer(s_inp)
+
+    print("taking list of feature vectors")
+    s_inp = conv_layer(s_inp)
+    print(s_inp.shape)
+
+    print("preparing to feed LSTM model")
+    s_inp = tf.reshape(s_inp, [batch_size, seq_len, features])
+    print(s_inp.shape)
+
+    print("classifier model inference")
+    s_out = classifier(s_inp)
+
+    print("classification result :")
     print(s_out.shape)
-    s_out = tf.reshape(s_out, [batch_size, seq_len, features])
-    print(s_out.shape)
-    #s_out = classifier(s_inp, conv_layer)
-    #print("classification output :")
-    #print(s_out.shape)
-    #print(s_out)
+    print(s_out)
 
