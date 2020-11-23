@@ -18,7 +18,7 @@ BATCH_SIZE    = 64
 EPOCHS        = 1
 DECAY_STEPS   = 1000
 LEARNING_RATE = 0.1
-SAVE_STEP     = 100
+SAVE_STEP     = 1
 
 
 class ConvolutionalLayer(tf.keras.layers.Layer):
