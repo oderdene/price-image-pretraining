@@ -9,10 +9,10 @@ This repo's attempt is try to pre-train images of prices.
 - DONE : Change a RestNet50 to the light weight layers
 - DONE : Freeze trained layer for finetuning
 - DONE : Fine-tune model for classification
+- DONE : Compose LSTM classifier model with convolutional feature vectors from SimCLR
 - ONGOING : Do actual training on bigger dataset
 - Plot some image features on tSNE
 - Prepare sample dataset for classification
-- Compose LSTM classifier model with convolutional feature vectors from SimCLR
 - Evaluate classification result and also plot features
 
 # References
