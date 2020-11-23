@@ -10,7 +10,7 @@ if tf.config.list_physical_devices('GPU'):
     physical_devices = tf.config.list_physical_devices('GPU')
     tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
     tf.config.experimental.set_virtual_device_configuration(
-        physical_devices[0], 
+        physical_devices[0],
         [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4000)])
 
 
@@ -53,7 +53,7 @@ class SimCLR(tf.keras.Model):
         super(SimCLR, self).__init__()
         self.conv_layer   = ConvolutionalLayer(
                 input_shape=(256, 256, 3),
-                output_features=256,
+                output_features=128,
                 name="convolutional_features")
         self.projection_1 = tf.keras.layers.Dense(256, activation='relu')
         self.projection_2 = tf.keras.layers.Dense(128, activation='relu')
@@ -74,10 +74,14 @@ class ClassifierModel(tf.keras.Model):
                 )
         self.conv_layer.set_weights(conv_weights)
         self.conv_layer.trainable = False
+        #self.reshaper     = tf.keras.layers.Reshape()
         self.output_layer = tf.keras.layers.Dense(n_classes, activation='softmax')
     def call(self, inputs):
-        x = self.conv_layer(inputs)
-        return self.output_layer(x)
+        x = tf.reshape(inputs, [-1, 256, 256, 3])
+        #x = self.conv_layer(x)
+        #x = conv_inference(inputs)
+        return x
+        #return self.output_layer(x)
 
 
 if __name__=="__main__":
@@ -105,10 +109,22 @@ if __name__=="__main__":
     conv_layer   = simclr_model.get_layer('convolutional_features')
     conv_weights = conv_layer.get_weights()
 
-    classifier = ClassifierModel(conv_weights, n_classes=10)
-    s_inp = tf.random.normal(shape=(5, 256, 256, 3))
-    s_out = classifier(s_inp)
-    print("classification output :")
+
+    batch_size = 5
+    seq_len    = 10
+    features   = 128
+
+    classifier = ClassifierModel(conv_weights, n_classes=3)            # [up, down, hold]
+    s_inp = tf.random.normal(shape=(batch_size, seq_len, 256, 256, 3)) # [batch, seq, height, width, channel]
+    print(s_inp.shape)
+    s_inp = tf.reshape(s_inp, [-1, 256, 256, 3])
+    print(s_inp.shape)
+    s_out = conv_layer(s_inp)
     print(s_out.shape)
-    print(s_out)
+    s_out = tf.reshape(s_out, [batch_size, seq_len, features])
+    print(s_out.shape)
+    #s_out = classifier(s_inp, conv_layer)
+    #print("classification output :")
+    #print(s_out.shape)
+    #print(s_out)
 

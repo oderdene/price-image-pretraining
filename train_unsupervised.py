@@ -10,7 +10,7 @@ if tf.config.list_physical_devices('GPU'):
     physical_devices = tf.config.list_physical_devices('GPU')
     tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
     tf.config.experimental.set_virtual_device_configuration(
-        physical_devices[0], 
+        physical_devices[0],
         [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4000)])
 
 
@@ -53,7 +53,7 @@ class SimCLR(tf.keras.Model):
         super(SimCLR, self).__init__()
         self.conv_layer   = ConvolutionalLayer(
                 input_shape=(256, 256, 3),
-                output_features=256,
+                output_features=128,
                 name="convolutional_features")
         self.projection_1 = tf.keras.layers.Dense(256, activation='relu')
         self.projection_2 = tf.keras.layers.Dense(128, activation='relu')
@@ -162,8 +162,8 @@ if __name__=="__main__":
         total_steps = int(len(ds.image_paths)/BATCH_SIZE)
         for step in range(total_steps):
             xis, xjs = ds.next_batch(batch_size=BATCH_SIZE)
-            xis = tf.convert_to_tensor(xis, dtype=tf.float32)
-            xjs = tf.convert_to_tensor(xjs, dtype=tf.float32)
+            xis  = tf.convert_to_tensor(xis, dtype=tf.float32)
+            xjs  = tf.convert_to_tensor(xjs, dtype=tf.float32)
             loss = train_step(xis, xjs, simclr_model, optimizer, criterion, temperature=0.1)
             print("epoch {} step {} of {}, loss {}".format(
                 epoch, step, total_steps-1, loss
