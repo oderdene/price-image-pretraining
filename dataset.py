@@ -167,8 +167,8 @@ def preprocess_image(image, height, width):
 
 class Dataset:
     def __init__(self, folder_path):
-        self.height = 256
-        self.width  = 256
+        self.height = 128 #256
+        self.width  = 128 #256
         print("dataset is loading please wait...")
         self.image_paths = []
         for root, dirs, files in os.walk(folder_path):

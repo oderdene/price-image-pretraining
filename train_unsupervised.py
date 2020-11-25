@@ -11,21 +11,21 @@ from dataset import Dataset
 if tf.config.list_physical_devices('GPU'):
     physical_devices = tf.config.list_physical_devices('GPU')
     tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
-    tf.config.experimental.set_virtual_device_configuration(
-        physical_devices[0],
-        [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4000)])
+    #tf.config.experimental.set_virtual_device_configuration(
+    #    physical_devices[0],
+    #    [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4000)])
 
 
 config = configparser.ConfigParser()
 config.read("config.ini")
 
-BATCH_SIZE    = int(config["DEFAULT"]["BATCH_SIZE"  ])
-EPOCHS        = int(config["DEFAULT"]["EPOCHS"      ])
-SAVE_STEPS    = int(config["DEFAULT"]["SAVE_STEPS"  ])
-DATASET_PATH  = str(config["DEFAULT"]["DATASET_PATH"])
+BATCH_SIZE    = int  (config["DEFAULT"]["BATCH_SIZE"   ])
+EPOCHS        = int  (config["DEFAULT"]["EPOCHS"       ])
+SAVE_STEPS    = int  (config["DEFAULT"]["SAVE_STEPS"   ])
+DATASET_PATH  = str  (config["DEFAULT"]["DATASET_PATH" ])
+DECAY_STEPS   = int  (config["DEFAULT"]["DECAY_STEPS"  ])
+LEARNING_RATE = float(config["DEFAULT"]["LEARNING_RATE"])
 
-LEARNING_RATE = 0.1
-DECAY_STEPS   = 1000
 
 
 class ConvolutionalLayer(tf.keras.layers.Layer):
@@ -59,7 +59,8 @@ class SimCLR(tf.keras.Model):
     def __init__(self,):
         super(SimCLR, self).__init__()
         self.conv_layer   = ConvolutionalLayer(
-                input_shape=(256, 256, 3),
+                #input_shape=(256, 256, 3),
+                input_shape=(128, 128, 3),
                 output_features=128,
                 name="convolutional_features")
         self.projection_1 = tf.keras.layers.Dense(256, activation='relu')
@@ -147,6 +148,7 @@ if __name__=="__main__":
             initial_learning_rate = LEARNING_RATE,
             decay_steps           = DECAY_STEPS)
     optimizer = tf.keras.optimizers.SGD(lr_decayed_fn)
+    #optimizer = tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE)
 
     simclr_model = SimCLR()
 
@@ -171,7 +173,7 @@ if __name__=="__main__":
             xis, xjs = ds.next_batch(batch_size=BATCH_SIZE)
             xis  = tf.convert_to_tensor(xis, dtype=tf.float32)
             xjs  = tf.convert_to_tensor(xjs, dtype=tf.float32)
-            loss = train_step(xis, xjs, simclr_model, optimizer, criterion, temperature=0.1)
+            loss = train_step(xis, xjs, simclr_model, optimizer, criterion, temperature=0.5)
             print("epoch {} step {} of {}, loss {}".format(
                 epoch, step, total_steps-1, loss
                 ))

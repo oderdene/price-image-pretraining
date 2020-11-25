@@ -6,12 +6,12 @@ import tensorflow as tf
 import numpy as np
 from dataset import Dataset
 
-if tf.config.list_physical_devices('GPU'):
-    physical_devices = tf.config.list_physical_devices('GPU')
-    tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
-    tf.config.experimental.set_virtual_device_configuration(
-        physical_devices[0],
-        [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4000)])
+#if tf.config.list_physical_devices('GPU'):
+#    physical_devices = tf.config.list_physical_devices('GPU')
+#    tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
+#    tf.config.experimental.set_virtual_device_configuration(
+#        physical_devices[0],
+#        [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4000)])
 
 
 BATCH_SIZE    = 64
@@ -52,7 +52,8 @@ class SimCLR(tf.keras.Model):
     def __init__(self,):
         super(SimCLR, self).__init__()
         self.conv_layer   = ConvolutionalLayer(
-                input_shape=(256, 256, 3),
+                #input_shape=(256, 256, 3),
+                input_shape=(128, 128, 3),
                 output_features=128,
                 name="convolutional_features")
         self.projection_1 = tf.keras.layers.Dense(256, activation='relu')
@@ -111,11 +112,11 @@ if __name__=="__main__":
 
 
     print("batch of sequence of images to be classified")
-    s_inp = tf.random.normal(shape=(batch_size, seq_len, 256, 256, 3)) # [batch, seq, height, width, channel]
+    s_inp = tf.random.normal(shape=(batch_size, seq_len, 128, 128, 3)) # [batch, seq, height, width, channel]
     print(s_inp.shape)
 
     print("preparing to get feature vector using convolutional layer")
-    s_inp = tf.reshape(s_inp, [-1, 256, 256, 3])
+    s_inp = tf.reshape(s_inp, [-1, 128, 128, 3])
     print(s_inp.shape)
 
     print("taking list of feature vectors")
