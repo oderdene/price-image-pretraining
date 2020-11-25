@@ -1,9 +1,11 @@
 import os
 import sys
 import random
+import configparser
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
+import cv2 as cv
 from dataset import Dataset
 
 if tf.config.list_physical_devices('GPU'):
@@ -14,11 +16,16 @@ if tf.config.list_physical_devices('GPU'):
         [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4000)])
 
 
-BATCH_SIZE    = 64
-EPOCHS        = 1
-DECAY_STEPS   = 1000
+config = configparser.ConfigParser()
+config.read("config.ini")
+
+BATCH_SIZE    = int(config["DEFAULT"]["BATCH_SIZE"  ])
+EPOCHS        = int(config["DEFAULT"]["EPOCHS"      ])
+SAVE_STEPS    = int(config["DEFAULT"]["SAVE_STEPS"  ])
+DATASET_PATH  = str(config["DEFAULT"]["DATASET_PATH"])
+
 LEARNING_RATE = 0.1
-SAVE_STEP     = 1
+DECAY_STEPS   = 1000
 
 
 class ConvolutionalLayer(tf.keras.layers.Layer):
@@ -156,8 +163,8 @@ if __name__=="__main__":
     else:
         print("Initializing weights from scratch")
 
-    ds = Dataset(folder_path="./dataset")
-
+    ds = Dataset(folder_path=DATASET_PATH)
+        
     for epoch in range(EPOCHS):
         total_steps = int(len(ds.image_paths)/BATCH_SIZE)
         for step in range(total_steps):
@@ -169,7 +176,7 @@ if __name__=="__main__":
                 epoch, step, total_steps-1, loss
                 ))
             ckpt.step.assign_add(1)
-            if int(ckpt.step)%SAVE_STEP==0:
+            if int(ckpt.step)%SAVE_STEPS==0:
                 save_path = ckpt_manager.save()
                 print("Saved checkpoint for step {}: {}".format(int(ckpt.step), save_path))
             pass

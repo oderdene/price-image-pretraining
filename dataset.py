@@ -175,7 +175,7 @@ class Dataset:
             path = root.split(os.sep)
             for f in files:
                 current_folder = os.path.join(*path)
-                file_path = os.path.join(current_folder, f)
+                file_path      = os.path.join(current_folder, f)
                 if file_path.endswith('.png')==True:
                     self.image_paths.append(file_path)
         print("dataset is loaded.")
