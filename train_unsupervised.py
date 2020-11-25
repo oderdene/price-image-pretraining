@@ -35,24 +35,20 @@ class ConvolutionalLayer(tf.keras.layers.Layer):
                 32, kernel_size=(3, 3), activation='relu', input_shape=input_shape)
         self.maxpooling_1    = tf.keras.layers.MaxPooling2D(
                 pool_size=(2, 2), strides=2)
-        #self.dropout_1       = tf.keras.layers.Dropout(0.2)
         self.conv_2          = tf.keras.layers.Conv2D(
                 64, kernel_size=(3, 3), activation='relu')
         self.normalization_1 = tf.keras.layers.BatchNormalization()
         self.maxpooling_2    = tf.keras.layers.MaxPooling2D(
                 pool_size=(2, 2), strides=2)
         self.averagepooling  = tf.keras.layers.GlobalAveragePooling2D()
-        #self.dropout_2       = tf.keras.layers.Dropout(0.5)
         self.output_layer    = tf.keras.layers.Dense(output_features)
     def call(self, inputs, training=False):
         x = self.conv_1(inputs)
         x = self.maxpooling_1(x)
-        #x = self.dropout_1(x, training=training)
         x = self.conv_2(x)
         x = self.normalization_1(x)
         x = self.maxpooling_2(x)
         x = self.averagepooling(x)
-        #x = self.dropout_2(x, training=training)
         return self.output_layer(x)
 
 class SimCLR(tf.keras.Model):
@@ -144,11 +140,11 @@ if __name__=="__main__":
     criterion = tf.keras.losses.SparseCategoricalCrossentropy(
             from_logits = True,
             reduction   = tf.keras.losses.Reduction.SUM)
-    lr_decayed_fn = tf.keras.experimental.CosineDecay(
-            initial_learning_rate = LEARNING_RATE,
-            decay_steps           = DECAY_STEPS)
-    optimizer = tf.keras.optimizers.SGD(lr_decayed_fn)
-    #optimizer = tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE)
+    #lr_decayed_fn = tf.keras.experimental.CosineDecay(
+    #        initial_learning_rate = LEARNING_RATE,
+    #        decay_steps           = DECAY_STEPS)
+    #optimizer = tf.keras.optimizers.SGD(lr_decayed_fn)
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
 
     simclr_model = SimCLR()
 
