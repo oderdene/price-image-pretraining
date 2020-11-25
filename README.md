@@ -31,9 +31,9 @@ This repo's attempt is try to pre-train images of prices.
     DATASET_PATH = C:/Users/sharavsambuu/Downloads/EURUSD
 
 # Sample images
+![grayscale augmented batch](images/Figure_1.png?raw=true "grayscale augmented batch")
 ![augmented batch](images/crop_augmented_batch.png?raw=true "Augmented batch")
 ![price image 1](images/2020-03-02_30_330.png?raw=true "Price image 1")
 ![price image 2](images/2020-03-02_30_300.png?raw=true "Price image 2")
-![price image 3](images/2020-03-02_30_270.png?raw=true "Price image 2")
 
 
