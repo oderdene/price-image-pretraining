@@ -53,7 +53,7 @@ class SimCLR(tf.keras.Model):
         super(SimCLR, self).__init__()
         self.conv_layer   = ConvolutionalLayer(
                 #input_shape=(256, 256, 3),
-                input_shape=(128, 128, 3),
+                input_shape=(128, 128, 1),
                 output_features=128,
                 name="convolutional_features")
         self.projection_1 = tf.keras.layers.Dense(256, activation='relu')
@@ -112,11 +112,11 @@ if __name__=="__main__":
 
 
     print("batch of sequence of images to be classified")
-    s_inp = tf.random.normal(shape=(batch_size, seq_len, 128, 128, 3)) # [batch, seq, height, width, channel]
+    s_inp = tf.random.normal(shape=(batch_size, seq_len, 128, 128, 1)) # [batch, seq, height, width, channel]
     print(s_inp.shape)
 
     print("preparing to get feature vector using convolutional layer")
-    s_inp = tf.reshape(s_inp, [-1, 128, 128, 3])
+    s_inp = tf.reshape(s_inp, [-1, 128, 128, 1])
     print(s_inp.shape)
 
     print("taking list of feature vectors")

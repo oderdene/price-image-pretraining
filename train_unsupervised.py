@@ -60,7 +60,7 @@ class SimCLR(tf.keras.Model):
         super(SimCLR, self).__init__()
         self.conv_layer   = ConvolutionalLayer(
                 #input_shape=(256, 256, 3),
-                input_shape=(128, 128, 3),
+                input_shape=(128, 128, 1),
                 output_features=128,
                 name="convolutional_features")
         self.projection_1 = tf.keras.layers.Dense(256, activation='relu')
