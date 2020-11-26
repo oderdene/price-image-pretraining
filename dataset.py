@@ -167,15 +167,15 @@ def preprocess_image(image, height, width):
 
 class Dataset:
     def __init__(self, folder_path):
-        self.height = 256
-        self.width  = 256
+        self.height = 128 #256
+        self.width  = 128 #256
         print("dataset is loading please wait...")
         self.image_paths = []
         for root, dirs, files in os.walk(folder_path):
             path = root.split(os.sep)
             for f in files:
                 current_folder = os.path.join(*path)
-                file_path = os.path.join(current_folder, f)
+                file_path      = os.path.join(current_folder, f)
                 if file_path.endswith('.png')==True:
                     self.image_paths.append(file_path)
         print("dataset is loaded.")
@@ -190,17 +190,19 @@ class Dataset:
             img       = tf.image.resize_bicubic([img], [self.height, self.width])[0] # optional
             augmented_a = random_crop_with_resize(img, self.height, self.width)
             augmented_a = tf.reshape(augmented_a, [self.height, self.width, 3])
+            augmented_a = tf.image.rgb_to_grayscale(augmented_a)
             augmented_a = tf.clip_by_value(augmented_a, 0., 1.)
             batch_a.append(augmented_a)
             augmented_b = random_crop_with_resize(img, self.height, self.width)
             augmented_b = tf.reshape(augmented_b, [self.height, self.width, 3])
+            augmented_b = tf.image.rgb_to_grayscale(augmented_b)
             augmented_b = tf.clip_by_value(augmented_b, 0., 1.)
             batch_b.append(augmented_b)
         return batch_a, batch_b
 
 
 if __name__=="__main__":
-    batch_size = 5
+    batch_size = 2
 
     f, axarr = plt.subplots(batch_size,2)
 

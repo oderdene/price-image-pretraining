@@ -1,24 +1,31 @@
 import os
 import sys
 import random
+import configparser
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import numpy as np
+import cv2 as cv
 from dataset import Dataset
 
 if tf.config.list_physical_devices('GPU'):
     physical_devices = tf.config.list_physical_devices('GPU')
     tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
-    tf.config.experimental.set_virtual_device_configuration(
-        physical_devices[0],
-        [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4000)])
+    #tf.config.experimental.set_virtual_device_configuration(
+    #    physical_devices[0],
+    #    [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4000)])
 
 
-BATCH_SIZE    = 64
-EPOCHS        = 1
-DECAY_STEPS   = 1000
-LEARNING_RATE = 0.1
-SAVE_STEP     = 1
+config = configparser.ConfigParser()
+config.read("config.ini")
+
+BATCH_SIZE    = int  (config["DEFAULT"]["BATCH_SIZE"   ])
+EPOCHS        = int  (config["DEFAULT"]["EPOCHS"       ])
+SAVE_STEPS    = int  (config["DEFAULT"]["SAVE_STEPS"   ])
+DATASET_PATH  = str  (config["DEFAULT"]["DATASET_PATH" ])
+DECAY_STEPS   = int  (config["DEFAULT"]["DECAY_STEPS"  ])
+LEARNING_RATE = float(config["DEFAULT"]["LEARNING_RATE"])
+
 
 
 class ConvolutionalLayer(tf.keras.layers.Layer):
@@ -28,31 +35,28 @@ class ConvolutionalLayer(tf.keras.layers.Layer):
                 32, kernel_size=(3, 3), activation='relu', input_shape=input_shape)
         self.maxpooling_1    = tf.keras.layers.MaxPooling2D(
                 pool_size=(2, 2), strides=2)
-        self.dropout_1       = tf.keras.layers.Dropout(0.2)
         self.conv_2          = tf.keras.layers.Conv2D(
                 64, kernel_size=(3, 3), activation='relu')
         self.normalization_1 = tf.keras.layers.BatchNormalization()
         self.maxpooling_2    = tf.keras.layers.MaxPooling2D(
                 pool_size=(2, 2), strides=2)
         self.averagepooling  = tf.keras.layers.GlobalAveragePooling2D()
-        self.dropout_2       = tf.keras.layers.Dropout(0.5)
         self.output_layer    = tf.keras.layers.Dense(output_features)
     def call(self, inputs, training=False):
         x = self.conv_1(inputs)
         x = self.maxpooling_1(x)
-        x = self.dropout_1(x, training=training)
         x = self.conv_2(x)
         x = self.normalization_1(x)
         x = self.maxpooling_2(x)
         x = self.averagepooling(x)
-        x = self.dropout_2(x, training=training)
         return self.output_layer(x)
 
 class SimCLR(tf.keras.Model):
     def __init__(self,):
         super(SimCLR, self).__init__()
         self.conv_layer   = ConvolutionalLayer(
-                input_shape=(256, 256, 3),
+                #input_shape=(256, 256, 3),
+                input_shape=(128, 128, 1),
                 output_features=128,
                 name="convolutional_features")
         self.projection_1 = tf.keras.layers.Dense(256, activation='relu')
@@ -136,10 +140,11 @@ if __name__=="__main__":
     criterion = tf.keras.losses.SparseCategoricalCrossentropy(
             from_logits = True,
             reduction   = tf.keras.losses.Reduction.SUM)
-    lr_decayed_fn = tf.keras.experimental.CosineDecay(
-            initial_learning_rate = LEARNING_RATE,
-            decay_steps           = DECAY_STEPS)
-    optimizer = tf.keras.optimizers.SGD(lr_decayed_fn)
+    #lr_decayed_fn = tf.keras.experimental.CosineDecay(
+    #        initial_learning_rate = LEARNING_RATE,
+    #        decay_steps           = DECAY_STEPS)
+    #optimizer = tf.keras.optimizers.SGD(lr_decayed_fn)
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
 
     simclr_model = SimCLR()
 
@@ -156,20 +161,20 @@ if __name__=="__main__":
     else:
         print("Initializing weights from scratch")
 
-    ds = Dataset(folder_path="./dataset")
-
+    ds = Dataset(folder_path=DATASET_PATH)
+        
     for epoch in range(EPOCHS):
         total_steps = int(len(ds.image_paths)/BATCH_SIZE)
         for step in range(total_steps):
             xis, xjs = ds.next_batch(batch_size=BATCH_SIZE)
             xis  = tf.convert_to_tensor(xis, dtype=tf.float32)
             xjs  = tf.convert_to_tensor(xjs, dtype=tf.float32)
-            loss = train_step(xis, xjs, simclr_model, optimizer, criterion, temperature=0.1)
+            loss = train_step(xis, xjs, simclr_model, optimizer, criterion, temperature=0.5)
             print("epoch {} step {} of {}, loss {}".format(
                 epoch, step, total_steps-1, loss
                 ))
             ckpt.step.assign_add(1)
-            if int(ckpt.step)%SAVE_STEP==0:
+            if int(ckpt.step)%SAVE_STEPS==0:
                 save_path = ckpt_manager.save()
                 print("Saved checkpoint for step {}: {}".format(int(ckpt.step), save_path))
             pass

@@ -21,10 +21,19 @@ This repo's attempt is try to pre-train images of prices.
 - https://github.com/google-research/simclr
 - https://github.com/sayakpaul/SimCLR-in-TensorFlow-2
 
+# Config
+    [DEFAULT]
+    BATCH_SIZE = 512
+    EPOCHS = 100
+    SAVE_STEPS = 100
+    LEARNING_RATE = 0.1
+    DECAY_STEPS = 100
+    DATASET_PATH = C:/Users/sharavsambuu/Downloads/EURUSD
+
 # Sample images
+![grayscale augmented batch](images/Figure_1.png?raw=true "grayscale augmented batch")
 ![augmented batch](images/crop_augmented_batch.png?raw=true "Augmented batch")
 ![price image 1](images/2020-03-02_30_330.png?raw=true "Price image 1")
 ![price image 2](images/2020-03-02_30_300.png?raw=true "Price image 2")
-![price image 3](images/2020-03-02_30_270.png?raw=true "Price image 2")
 
 

@@ -6,12 +6,12 @@ import tensorflow as tf
 import numpy as np
 from dataset import Dataset
 
-if tf.config.list_physical_devices('GPU'):
-    physical_devices = tf.config.list_physical_devices('GPU')
-    tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
-    tf.config.experimental.set_virtual_device_configuration(
-        physical_devices[0],
-        [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4000)])
+#if tf.config.list_physical_devices('GPU'):
+#    physical_devices = tf.config.list_physical_devices('GPU')
+#    tf.config.experimental.set_memory_growth(physical_devices[0], enable=True)
+#    tf.config.experimental.set_virtual_device_configuration(
+#        physical_devices[0],
+#        [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4000)])
 
 
 BATCH_SIZE    = 64
@@ -28,31 +28,28 @@ class ConvolutionalLayer(tf.keras.layers.Layer):
                 32, kernel_size=(3, 3), activation='relu', input_shape=input_shape)
         self.maxpooling_1    = tf.keras.layers.MaxPooling2D(
                 pool_size=(2, 2), strides=2)
-        self.dropout_1       = tf.keras.layers.Dropout(0.2)
         self.conv_2          = tf.keras.layers.Conv2D(
                 64, kernel_size=(3, 3), activation='relu')
         self.normalization_1 = tf.keras.layers.BatchNormalization()
         self.maxpooling_2    = tf.keras.layers.MaxPooling2D(
                 pool_size=(2, 2), strides=2)
         self.averagepooling  = tf.keras.layers.GlobalAveragePooling2D()
-        self.dropout_2       = tf.keras.layers.Dropout(0.5)
         self.output_layer    = tf.keras.layers.Dense(output_features)
     def call(self, inputs):
         x = self.conv_1(inputs)
         x = self.maxpooling_1(x)
-        x = self.dropout_1(x)
         x = self.conv_2(x)
         x = self.normalization_1(x)
         x = self.maxpooling_2(x)
         x = self.averagepooling(x)
-        x = self.dropout_2(x)
         return self.output_layer(x)
 
 class SimCLR(tf.keras.Model):
     def __init__(self,):
         super(SimCLR, self).__init__()
         self.conv_layer   = ConvolutionalLayer(
-                input_shape=(256, 256, 3),
+                #input_shape=(256, 256, 3),
+                input_shape=(128, 128, 1),
                 output_features=128,
                 name="convolutional_features")
         self.projection_1 = tf.keras.layers.Dense(256, activation='relu')
@@ -111,11 +108,11 @@ if __name__=="__main__":
 
 
     print("batch of sequence of images to be classified")
-    s_inp = tf.random.normal(shape=(batch_size, seq_len, 256, 256, 3)) # [batch, seq, height, width, channel]
+    s_inp = tf.random.normal(shape=(batch_size, seq_len, 128, 128, 1)) # [batch, seq, height, width, channel]
     print(s_inp.shape)
 
     print("preparing to get feature vector using convolutional layer")
-    s_inp = tf.reshape(s_inp, [-1, 256, 256, 3])
+    s_inp = tf.reshape(s_inp, [-1, 128, 128, 1])
     print(s_inp.shape)
 
     print("taking list of feature vectors")
