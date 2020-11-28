@@ -150,11 +150,11 @@ if __name__=="__main__":
     criterion = tf.keras.losses.SparseCategoricalCrossentropy(
             from_logits = True,
             reduction   = tf.keras.losses.Reduction.SUM)
-    lr_decayed_fn = tf.keras.experimental.CosineDecay(
-            initial_learning_rate = LEARNING_RATE,
-            decay_steps           = DECAY_STEPS)
-    optimizer = tf.keras.optimizers.SGD(lr_decayed_fn)
-    #optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
+    #lr_decayed_fn = tf.keras.experimental.CosineDecay(
+    #        initial_learning_rate = LEARNING_RATE,
+    #        decay_steps           = DECAY_STEPS)
+    #optimizer = tf.keras.optimizers.SGD(lr_decayed_fn)
+    optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
 
     simclr_model = SimCLR()
 
@@ -172,12 +172,11 @@ if __name__=="__main__":
         print("Initializing weights from scratch")
 
     ds = Dataset(folder_path=DATASET_PATH, mem_length=10000)
-    ds.update_dataset(batch_size=512)
+    ds.update_dataset(batch_size=1024)
 
     def dataset_updater():
         while True:
-            ds.update_dataset(batch_size=512)
-            time.sleep(0.01)
+            ds.update_dataset(batch_size=256)
 
     thread = threading.Thread(target=dataset_updater)
     thread.daemon = True
@@ -200,6 +199,5 @@ if __name__=="__main__":
                 save_path = ckpt_manager.save()
                 print("Saved checkpoint for step {}: {}".format(int(ckpt.step), save_path))
             pass
-            time.sleep(0.001)
         pass
     pass
