@@ -1,6 +1,9 @@
 import os
 import sys
+import signal
 import random
+import threading
+import time
 import configparser
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -134,17 +137,24 @@ def train_step(xis, xjs, model, optimizer, criterion, temperature):
     return loss
 
 
+def signal_handler(signal, frame):
+    print("script killed...")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+
+
 if __name__=="__main__":
     print("##### Unsupervised training of price images #####")
 
     criterion = tf.keras.losses.SparseCategoricalCrossentropy(
             from_logits = True,
             reduction   = tf.keras.losses.Reduction.SUM)
-    #lr_decayed_fn = tf.keras.experimental.CosineDecay(
-    #        initial_learning_rate = LEARNING_RATE,
-    #        decay_steps           = DECAY_STEPS)
-    #optimizer = tf.keras.optimizers.SGD(lr_decayed_fn)
-    optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
+    lr_decayed_fn = tf.keras.experimental.CosineDecay(
+            initial_learning_rate = LEARNING_RATE,
+            decay_steps           = DECAY_STEPS)
+    optimizer = tf.keras.optimizers.SGD(lr_decayed_fn)
+    #optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
 
     simclr_model = SimCLR()
 
@@ -161,22 +171,35 @@ if __name__=="__main__":
     else:
         print("Initializing weights from scratch")
 
-    ds = Dataset(folder_path=DATASET_PATH)
-        
+    ds = Dataset(folder_path=DATASET_PATH, mem_length=10000)
+    ds.update_dataset(batch_size=512)
+
+    def dataset_updater():
+        while True:
+            ds.update_dataset(batch_size=512)
+            time.sleep(0.01)
+
+    thread = threading.Thread(target=dataset_updater)
+    thread.daemon = True
+    thread.start()
+    
+    total_images = 300000.0
+
     for epoch in range(EPOCHS):
-        total_steps = int(len(ds.image_paths)/BATCH_SIZE)
+        total_steps = int(total_images/BATCH_SIZE)
         for step in range(total_steps):
             xis, xjs = ds.next_batch(batch_size=BATCH_SIZE)
             xis  = tf.convert_to_tensor(xis, dtype=tf.float32)
             xjs  = tf.convert_to_tensor(xjs, dtype=tf.float32)
             loss = train_step(xis, xjs, simclr_model, optimizer, criterion, temperature=0.5)
-            print("epoch {} step {} of {}, loss {}".format(
-                epoch, step, total_steps-1, loss
+            print("cache {} epoch {} step {} of {}, loss {}".format(
+                len(ds.cache), epoch, step, total_steps-1, loss
                 ))
             ckpt.step.assign_add(1)
             if int(ckpt.step)%SAVE_STEPS==0:
                 save_path = ckpt_manager.save()
                 print("Saved checkpoint for step {}: {}".format(int(ckpt.step), save_path))
             pass
+            time.sleep(0.001)
         pass
     pass
