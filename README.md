@@ -33,6 +33,7 @@ This repo's attempt is try to pre-train images of prices.
     DATASET_PATH = C:/Users/sharavsambuu/Downloads/EURUSD
 
 # Sample images
+![tSNE](images/tSNE.png?raw=true "tSNE")
 ![grayscale augmented batch](images/Figure_1.png?raw=true "grayscale augmented batch")
 ![augmented batch](images/crop_augmented_batch.png?raw=true "Augmented batch")
 ![price image 1](images/2020-03-02_30_330.png?raw=true "Price image 1")
