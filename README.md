@@ -11,8 +11,8 @@ This repo's attempt is try to pre-train images of prices.
 - DONE : Fine-tune model for classification
 - DONE : Compose LSTM classifier model with convolutional feature vectors from SimCLR
 - DONE : Speed up dataset sampler
-- ONGOING : Plot image features on tSNE
-- ONGOING : Visualized learned features
+- DONE : Plot image features on tSNE
+- ONGOING : Visualized learned CNN features
 - Do actual training on bigger dataset
 - Prepare sample dataset for classification
 - Evaluate classification result and also plot features
