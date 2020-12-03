@@ -173,6 +173,9 @@ class Dataset:
         self.width  = 128 #256
         print("dataset is loading please wait...")
         self.image_paths = []
+        with open("./image_paths.txt") as f:
+            self.image_paths = [line.rstrip() for line in f]
+        """
         for root, dirs, files in os.walk(folder_path):
             path = root.split(os.sep)
             for f in files:
@@ -180,6 +183,7 @@ class Dataset:
                 file_path      = os.path.join(current_folder, f)
                 if file_path.endswith('.png')==True:
                     self.image_paths.append(file_path)
+        """
         print("dataset is loaded.")
         pass
     def update_dataset(self, batch_size=64):

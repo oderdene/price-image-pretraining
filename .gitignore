@@ -141,3 +141,4 @@ cython_debug/
 dataset/
 checkpoints/
 config.ini
+image_paths.txt
