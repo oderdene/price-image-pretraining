@@ -28,6 +28,7 @@ SAVE_STEPS    = int  (config["DEFAULT"]["SAVE_STEPS"   ])
 DATASET_PATH  = str  (config["DEFAULT"]["DATASET_PATH" ])
 DECAY_STEPS   = int  (config["DEFAULT"]["DECAY_STEPS"  ])
 LEARNING_RATE = float(config["DEFAULT"]["LEARNING_RATE"])
+TOTAL_IMAGES  = float(config["DEFAULT"]["TOTAL_IMAGES" ])
 
 
 
@@ -188,7 +189,7 @@ if __name__=="__main__":
     thread.daemon = True
     thread.start()
     
-    total_images = 300000.0
+    total_images = TOTAL_IMAGES
 
     for epoch in range(EPOCHS):
         total_steps = int(total_images/BATCH_SIZE)

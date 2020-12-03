@@ -25,12 +25,13 @@ This repo's attempt is try to pre-train images of prices.
 
 # Config
     [DEFAULT]
-    BATCH_SIZE = 512
-    EPOCHS = 100
-    SAVE_STEPS = 500
-    LEARNING_RATE = 0.1
-    DECAY_STEPS = 1000
-    DATASET_PATH = C:/Users/sharavsambuu/Downloads/EURUSD
+		BATCH_SIZE = 256
+		EPOCHS = 1000
+		SAVE_STEPS = 500
+		LEARNING_RATE = 0.1
+		DECAY_STEPS = 1000
+		TOTAL_IMAGES = 9276362
+		DATASET_PATH = C:/src/data
 
 # Sample images
 ![tSNE 3D](images/scattering3d.png?raw=true "tSNE 3D")
