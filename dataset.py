@@ -1,5 +1,6 @@
 import os
 import random
+from collections import deque
 import tensorflow.compat.v1 as tf
 import cv2 as cv
 import numpy as np
@@ -166,11 +167,15 @@ def preprocess_image(image, height, width):
 
 
 class Dataset:
-    def __init__(self, folder_path):
+    def __init__(self, folder_path, mem_length=1000):
+        self.cache  = deque(maxlen=mem_length)
         self.height = 128 #256
         self.width  = 128 #256
         print("dataset is loading please wait...")
         self.image_paths = []
+        with open("./image_paths.txt") as f:
+            self.image_paths = [line.rstrip() for line in f]
+        """
         for root, dirs, files in os.walk(folder_path):
             path = root.split(os.sep)
             for f in files:
@@ -178,27 +183,33 @@ class Dataset:
                 file_path      = os.path.join(current_folder, f)
                 if file_path.endswith('.png')==True:
                     self.image_paths.append(file_path)
+        """
         print("dataset is loaded.")
         pass
-    def next_batch(self, batch_size):
-        batch_a       = []
-        batch_b       = []
+    def update_dataset(self, batch_size=64):
         random_images = [random.choice(self.image_paths) for _ in range(batch_size)]
         for i, row in enumerate(random_images):
             img       = cv.cvtColor(cv.imread(row), cv.COLOR_BGR2RGB)
             img       = tf.convert_to_tensor(np.asarray((img / 255)).astype("float32"))
             img       = tf.image.resize_bicubic([img], [self.height, self.width])[0] # optional
+            
             augmented_a = random_crop_with_resize(img, self.height, self.width)
             augmented_a = tf.reshape(augmented_a, [self.height, self.width, 3])
             augmented_a = tf.image.rgb_to_grayscale(augmented_a)
             augmented_a = tf.clip_by_value(augmented_a, 0., 1.)
-            batch_a.append(augmented_a)
+            
             augmented_b = random_crop_with_resize(img, self.height, self.width)
             augmented_b = tf.reshape(augmented_b, [self.height, self.width, 3])
             augmented_b = tf.image.rgb_to_grayscale(augmented_b)
             augmented_b = tf.clip_by_value(augmented_b, 0., 1.)
-            batch_b.append(augmented_b)
-        return batch_a, batch_b
+            
+            self.cache.append((augmented_a, augmented_b))
+        print("dataset is updated : ", len(self.cache))
+        pass
+    def next_batch(self, batch_size):
+        batch = random.sample(self.cache, batch_size)
+        augmented_as, augmented_bs = zip(*batch)
+        return augmented_as, augmented_bs
 
 
 if __name__=="__main__":

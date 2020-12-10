@@ -33,14 +33,20 @@ class ConvolutionalLayer(tf.keras.layers.Layer):
         self.normalization_1 = tf.keras.layers.BatchNormalization()
         self.maxpooling_2    = tf.keras.layers.MaxPooling2D(
                 pool_size=(2, 2), strides=2)
+        self.conv_3          = tf.keras.layers.Conv2D(
+                128, kernel_size=(3, 3), activation='relu')
+        self.maxpooling_3    = tf.keras.layers.MaxPooling2D(
+                pool_size=(2, 2), strides=2)
         self.averagepooling  = tf.keras.layers.GlobalAveragePooling2D()
         self.output_layer    = tf.keras.layers.Dense(output_features)
-    def call(self, inputs):
+    def call(self, inputs, training=False):
         x = self.conv_1(inputs)
         x = self.maxpooling_1(x)
         x = self.conv_2(x)
         x = self.normalization_1(x)
         x = self.maxpooling_2(x)
+        x = self.conv_3(x)
+        x = self.maxpooling_3(x)
         x = self.averagepooling(x)
         return self.output_layer(x)
 

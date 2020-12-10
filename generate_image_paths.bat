@@ -1,0 +1,1 @@
+python image_paths.py > image_paths.txt

@@ -2,3 +2,6 @@ tensorflow
 opencv-python
 pandas
 matplotlib
+jupyter
+scikit-learn
+ray

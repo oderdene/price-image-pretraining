@@ -10,8 +10,10 @@ This repo's attempt is try to pre-train images of prices.
 - DONE : Freeze trained layer for finetuning
 - DONE : Fine-tune model for classification
 - DONE : Compose LSTM classifier model with convolutional feature vectors from SimCLR
-- ONGOING : Do actual training on bigger dataset
-- Plot some image features on tSNE
+- DONE : Speed up dataset sampler
+- DONE : Plot image features on tSNE
+- ONGOING : Implement concurrent image loader with ray library or multiprocessing
+- Do actual training on bigger dataset
 - Prepare sample dataset for classification
 - Evaluate classification result and also plot features
 
@@ -23,14 +25,17 @@ This repo's attempt is try to pre-train images of prices.
 
 # Config
     [DEFAULT]
-    BATCH_SIZE = 512
-    EPOCHS = 100
-    SAVE_STEPS = 100
-    LEARNING_RATE = 0.1
-    DECAY_STEPS = 100
-    DATASET_PATH = C:/Users/sharavsambuu/Downloads/EURUSD
+		BATCH_SIZE = 256
+		EPOCHS = 1000
+		SAVE_STEPS = 500
+		LEARNING_RATE = 0.1
+		DECAY_STEPS = 1000
+		TOTAL_IMAGES = 9276362
+		DATASET_PATH = C:/src/data
 
 # Sample images
+![tSNE 3D](images/scattering3d.png?raw=true "tSNE 3D")
+![tSNE](images/tSNE.png?raw=true "tSNE")
 ![grayscale augmented batch](images/Figure_1.png?raw=true "grayscale augmented batch")
 ![augmented batch](images/crop_augmented_batch.png?raw=true "Augmented batch")
 ![price image 1](images/2020-03-02_30_330.png?raw=true "Price image 1")

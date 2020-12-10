@@ -1,6 +1,9 @@
 import os
 import sys
+import signal
 import random
+import threading
+import time
 import configparser
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -25,6 +28,7 @@ SAVE_STEPS    = int  (config["DEFAULT"]["SAVE_STEPS"   ])
 DATASET_PATH  = str  (config["DEFAULT"]["DATASET_PATH" ])
 DECAY_STEPS   = int  (config["DEFAULT"]["DECAY_STEPS"  ])
 LEARNING_RATE = float(config["DEFAULT"]["LEARNING_RATE"])
+TOTAL_IMAGES  = float(config["DEFAULT"]["TOTAL_IMAGES" ])
 
 
 
@@ -40,6 +44,10 @@ class ConvolutionalLayer(tf.keras.layers.Layer):
         self.normalization_1 = tf.keras.layers.BatchNormalization()
         self.maxpooling_2    = tf.keras.layers.MaxPooling2D(
                 pool_size=(2, 2), strides=2)
+        self.conv_3          = tf.keras.layers.Conv2D(
+                128, kernel_size=(3, 3), activation='relu')
+        self.maxpooling_3    = tf.keras.layers.MaxPooling2D(
+                pool_size=(2, 2), strides=2)
         self.averagepooling  = tf.keras.layers.GlobalAveragePooling2D()
         self.output_layer    = tf.keras.layers.Dense(output_features)
     def call(self, inputs, training=False):
@@ -48,6 +56,8 @@ class ConvolutionalLayer(tf.keras.layers.Layer):
         x = self.conv_2(x)
         x = self.normalization_1(x)
         x = self.maxpooling_2(x)
+        x = self.conv_3(x)
+        x = self.maxpooling_3(x)
         x = self.averagepooling(x)
         return self.output_layer(x)
 
@@ -134,6 +144,13 @@ def train_step(xis, xjs, model, optimizer, criterion, temperature):
     return loss
 
 
+def signal_handler(signal, frame):
+    print("script killed...")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+
+
 if __name__=="__main__":
     print("##### Unsupervised training of price images #####")
 
@@ -161,17 +178,28 @@ if __name__=="__main__":
     else:
         print("Initializing weights from scratch")
 
-    ds = Dataset(folder_path=DATASET_PATH)
-        
+    ds = Dataset(folder_path=DATASET_PATH, mem_length=10000)
+    ds.update_dataset(batch_size=1024)
+
+    def dataset_updater():
+        while True:
+            ds.update_dataset(batch_size=256)
+
+    thread = threading.Thread(target=dataset_updater)
+    thread.daemon = True
+    thread.start()
+    
+    total_images = TOTAL_IMAGES
+
     for epoch in range(EPOCHS):
-        total_steps = int(len(ds.image_paths)/BATCH_SIZE)
+        total_steps = int(total_images/BATCH_SIZE)
         for step in range(total_steps):
             xis, xjs = ds.next_batch(batch_size=BATCH_SIZE)
             xis  = tf.convert_to_tensor(xis, dtype=tf.float32)
             xjs  = tf.convert_to_tensor(xjs, dtype=tf.float32)
             loss = train_step(xis, xjs, simclr_model, optimizer, criterion, temperature=0.5)
-            print("epoch {} step {} of {}, loss {}".format(
-                epoch, step, total_steps-1, loss
+            print("cache {} epoch {} step {} of {}, loss {}".format(
+                len(ds.cache), epoch, step, total_steps-1, loss
                 ))
             ckpt.step.assign_add(1)
             if int(ckpt.step)%SAVE_STEPS==0:
